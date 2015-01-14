@@ -112,7 +112,9 @@ namespace Nimbus.Infrastructure.MessageSendersAndReceivers
                                                     }))
                         .ToArray();
 
-                    if (_throttle.CurrentCount == 0) await Task.WhenAny(tasks);
+                    // PATCH: see https://github.com/NimbusAPI/Nimbus/issues/168
+                    // if (_throttle.CurrentCount == 0) await Task.WhenAny(tasks);
+                    await Task.WhenAny(tasks);
                 }
                 catch (OperationCanceledException)
                 {
