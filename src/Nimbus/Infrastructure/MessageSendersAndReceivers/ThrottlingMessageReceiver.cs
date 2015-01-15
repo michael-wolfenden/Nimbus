@@ -90,10 +90,15 @@ namespace Nimbus.Infrastructure.MessageSendersAndReceivers
                     int workerThreads;
                     int completionPortThreads;
                     ThreadPool.GetMinThreads(out workerThreads, out completionPortThreads);
-                    var batchSize = Math.Min(_throttle.CurrentCount, completionPortThreads);
+                    var currentCount = _throttle.CurrentCount;
+                    var batchSize = Math.Min(currentCount, completionPortThreads);
+
                     var messages = await FetchBatch(batchSize, cancellationTask);
                     if (!_running) return;
                     if (messages.None()) continue;
+
+                    _logger.Warn("Fetching: {batchSize}, Retrieved: {messages}, CompletionPortThreads: {completionPortThreads}, CurrentCount: {currentCount}",
+                       batchSize, messages.Length, completionPortThreads, currentCount);
 
                     GlobalMessageCounters.IncrementReceivedMessageCount(messages.Length);
 
